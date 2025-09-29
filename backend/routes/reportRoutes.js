@@ -1,16 +1,15 @@
-// routes/reportRoutes.js
+// backend/routes/reportRoutes.js
 // Defines API endpoints for generating various reports.
 
 import express from 'express';
-const router = express.Router();
-
-// We will create these controller functions in the next file
 import {
     getDailySalesReport,
     getLowStockReport,
-    getExpiryAlertReport
+    getExpiryAlertReport,
+    getTopSellingProducts // <-- IMPORT the new function
 } from '../controllers/reportController.js';
 
+const router = express.Router();
 
 // --- Report Routes ---
 
@@ -23,5 +22,8 @@ router.get('/stock/low', getLowStockReport);
 // Route to get a list of products expiring soon (e.g., within the next 30 days)
 router.get('/stock/expiring', getExpiryAlertReport);
 
+// --- NEW ROUTE ---
+// Route for the product recommender system
+router.get('/top-products', getTopSellingProducts);
 
 export default router;

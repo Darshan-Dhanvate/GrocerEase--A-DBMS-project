@@ -12,7 +12,9 @@ import Dashboard from './pages/Dashboard/Dashboard.jsx';
 import Billing from './pages/Billing/Billing.jsx';
 import Inventory from './pages/Inventory/Inventory.jsx';
 import Suppliers from './pages/Suppliers/Suppliers.jsx';
-import Settings from './pages/Settings/Settings.jsx'; // <-- IMPORT the new page
+import History from './pages/History/History.jsx';
+import Settings from './pages/Settings/Settings.jsx';
+import Recommender from './pages/Recommender/Recommender.jsx'; // <-- IMPORT the new page
 
 function App() {
   return (
@@ -25,7 +27,9 @@ function App() {
             <Route path="/billing" element={<Billing />} />
             <Route path="/inventory" element={<Inventory />} />
             <Route path="/suppliers" element={<Suppliers />} />
-            <Route path="/settings" element={<Settings />} /> {/* <-- ADD the new route */}
+            <Route path="/history" element={<History />} />
+            <Route path="/recommender" element={<Recommender />} /> {/* <-- ADD the new route */}
+            <Route path="/settings" element={<Settings />} />
             
             {/* A catch-all route for pages that don't exist */}
             <Route path="*" element={<h1 className="text-3xl font-bold">404: Page Not Found</h1>} />

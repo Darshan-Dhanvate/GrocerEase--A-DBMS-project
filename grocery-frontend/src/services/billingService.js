@@ -1,25 +1,25 @@
-// src/services/billingService.js
-// This file centralizes all API calls related to billing and sales transactions.
+// frontend/src/services/billingService.js
+// This file centralizes all API calls related to billing.
 
-import apiClient from './api';
+import apiClient from './api.js';
 
 /**
- * Creates a new bill by sending the cart items and details to the backend.
- * @param {Object} billData - The data for the new bill, including items.
+ * --- NEW FUNCTION ---
+ * Fetches a list of all bills from the backend.
  * @returns {Promise<Object>} A promise that resolves to the server's response data.
  */
-export const createBill = async (billData) => {
+export const getAllBills = async () => {
     try {
-        const response = await apiClient.post('/billing', billData);
+        const response = await apiClient.get('/billing');
         return response.data;
     } catch (error) {
-        console.error("Error creating bill:", error);
+        console.error("Error fetching all bills:", error);
         throw error;
     }
 };
 
 /**
- * Fetches the details of a single bill by its ID.
+ * Fetches the full details for a single bill by its ID.
  * @param {number} id - The ID of the bill to fetch.
  * @returns {Promise<Object>} A promise that resolves to the server's response data.
  */
@@ -29,6 +29,21 @@ export const getBillById = async (id) => {
         return response.data;
     } catch (error) {
         console.error(`Error fetching bill ${id}:`, error);
+        throw error;
+    }
+};
+
+/**
+ * Creates a new bill.
+ * @param {Object} billData - The data for the new bill.
+ * @returns {Promise<Object>} A promise that resolves to the server's response data.
+ */
+export const createBill = async (billData) => {
+    try {
+        const response = await apiClient.post('/billing', billData);
+        return response.data;
+    } catch (error) {
+        console.error("Error creating bill:", error);
         throw error;
     }
 };

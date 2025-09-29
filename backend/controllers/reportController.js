@@ -3,6 +3,45 @@
 
 import db from '../config/db.js';
 
+// @desc    Get top-selling products based on a time period
+// @route   GET /api/reports/top-products?period=7days
+// @access  Private/Admin
+export const getTopSellingProducts = async (req, res) => {
+    try {
+        const { period } = req.query; // e.g., '7days', '30days', 'alltime'
+        let whereClause = '';
+
+        // Dynamically build the date filter for the SQL query
+        if (period === '7days') {
+            whereClause = `WHERE b.bill_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)`;
+        } else if (period === '30days') {
+            whereClause = `WHERE b.bill_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)`;
+        }
+        // If 'alltime' or anything else, the whereClause remains empty, so all bills are included.
+
+        const sql = `
+            SELECT 
+                p.product_name,
+                p.brand,
+                SUM(bi.quantity_sold) AS total_quantity_sold
+            FROM Bill_Items bi
+            JOIN Products p ON bi.product_id = p.product_id
+            JOIN Bills b ON bi.bill_id = b.bill_id
+            ${whereClause}
+            GROUP BY p.product_id, p.product_name, p.brand
+            ORDER BY total_quantity_sold DESC
+            LIMIT 10; 
+        `; // We limit to the top 10 products
+
+        const [topProducts] = await db.query(sql);
+        res.status(200).json(topProducts);
+
+    } catch (error) {
+        console.error('Error generating top-selling products report:', error);
+        res.status(500).json({ message: 'Server error while generating report.' });
+    }
+};
+
 // @desc    Get daily sales report
 // @route   GET /api/reports/sales/daily
 // @access  Private/Admin
