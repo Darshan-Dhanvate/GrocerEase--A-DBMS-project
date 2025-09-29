@@ -1,15 +1,18 @@
-// src/pages/Billing/BillSummary.jsx
-// This component displays the current bill (cart), calculates totals, and handles bill generation.
-
+// frontend/src/pages/Billing/BillSummary.jsx
 import React, { useState, useMemo } from 'react';
-import { X, Receipt } from 'lucide-react';
+import { X, Receipt, UserPlus } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters.js';
 
 const BillSummary = ({ cartItems, onUpdateQuantity, onRemoveItem, onGenerateBill }) => {
-    const [discount, setDiscount] = useState(0); // Discount percentage
-    const [tax, setTax] = useState(5);         // Tax percentage, default to 5%
+    // State for financial details
+    const [discount, setDiscount] = useState(0);
+    const [tax, setTax] = useState(5);
+    
+    // State for Customer Details
+    const [customerName, setCustomerName] = useState('');
+    const [customerMobile, setCustomerMobile] = useState('');
 
-    // useMemo optimizes performance by only recalculating totals when dependencies change
+    // useMemo for optimized calculations
     const totals = useMemo(() => {
         const subtotal = cartItems.reduce((acc, item) => acc + (item.selling_price * item.quantity_sold), 0);
         const discountAmount = subtotal * (discount / 100);
@@ -18,17 +21,29 @@ const BillSummary = ({ cartItems, onUpdateQuantity, onRemoveItem, onGenerateBill
         const total = taxableAmount + taxAmount;
         return { subtotal, discountAmount, taxAmount, total };
     }, [cartItems, discount, tax]);
+    
+    // Gathers all data before calling the onGenerateBill function from the parent
+    const handleGenerateBillClick = () => {
+        const billData = {
+            discount_percentage: discount,
+            tax_percentage: tax,
+            customer_name: customerName,
+            customer_mobile: customerMobile,
+        };
+        onGenerateBill(billData);
+    };
 
     return (
         <div className="bg-white p-6 rounded-lg shadow-md flex flex-col h-full">
             <h3 className="text-xl font-bold mb-4 text-gray-700">Current Bill</h3>
 
+            {/* --- THIS SECTION IS RESTORED --- */}
             {/* Cart Items List */}
             <div className="flex-grow overflow-y-auto mb-4 pr-2">
                 {cartItems.length === 0 ? (
                     <p className="text-gray-500 text-center mt-10">No items added yet.</p>
                 ) : (
-                    cartItems.map((item, index) => (
+                    cartItems.map((item) => (
                         <div key={item.product_id} className="flex items-center justify-between py-2 border-b">
                             <div>
                                 <p className="font-semibold text-sm">{item.product_name}</p>
@@ -55,6 +70,31 @@ const BillSummary = ({ cartItems, onUpdateQuantity, onRemoveItem, onGenerateBill
                 )}
             </div>
 
+            {/* Customer Details Section */}
+            <div className="border-t pt-4 mb-4">
+                 <h4 className="font-semibold text-gray-600 mb-2 flex items-center text-sm">
+                    <UserPlus size={16} className="mr-2" />
+                    Customer Details (Optional)
+                </h4>
+                <div className="space-y-2">
+                    <input
+                        type="text"
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                        placeholder="Customer Name"
+                        className="w-full p-2 border rounded-md text-sm"
+                    />
+                    <input
+                        type="text"
+                        value={customerMobile}
+                        onChange={(e) => setCustomerMobile(e.target.value)}
+                        placeholder="Mobile Number"
+                        className="w-full p-2 border rounded-md text-sm"
+                    />
+                </div>
+            </div>
+
+            {/* --- THIS SECTION IS RESTORED --- */}
             {/* Financial Summary */}
             <div className="border-t pt-4 space-y-2 text-sm">
                 <div className="flex justify-between"><span>Subtotal:</span> <span>{formatCurrency(totals.subtotal)}</span></div>
@@ -76,7 +116,7 @@ const BillSummary = ({ cartItems, onUpdateQuantity, onRemoveItem, onGenerateBill
 
             {/* Generate Bill Button */}
             <button
-                onClick={() => onGenerateBill(discount, tax)}
+                onClick={handleGenerateBillClick}
                 disabled={cartItems.length === 0}
                 className="w-full bg-green-600 text-white py-3 rounded-md mt-4 hover:bg-green-700 font-bold flex items-center justify-center disabled:bg-gray-400"
             >

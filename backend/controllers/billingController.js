@@ -1,18 +1,24 @@
-// controllers/billingController.js
+// backend/controllers/billingController.js
 // Contains the logic for processing sales and managing bills.
 
 import db from '../config/db.js';
 
-// @desc    Create a new bill
+// @desc    Create a new bill and handle customer creation/linking
 // @route   POST /api/billing
 // @access  Private/Cashier
 export const createBill = async (req, res) => {
-    // A database connection is manually acquired from the pool for transactions
     let connection;
     try {
-        const { customer_id, discount_percentage, tax_percentage, items } = req.body;
+        const {
+            // New optional fields from the frontend
+            customer_name,
+            customer_mobile,
+            // Existing fields
+            discount_percentage,
+            tax_percentage,
+            items
+        } = req.body;
 
-        // --- 1. Validation ---
         if (!items || items.length === 0) {
             return res.status(400).json({ message: 'Cannot create a bill with no items.' });
         }
@@ -20,7 +26,30 @@ export const createBill = async (req, res) => {
         connection = await db.getConnection();
         await connection.beginTransaction();
 
-        // --- 2. Check Stock Availability & Calculate Totals ---
+        let customer_id = null;
+
+        // --- NEW CUSTOMER LOGIC ---
+        // Only process customer info if a name or mobile number is provided.
+        if (customer_name || customer_mobile) {
+            // Step 1: Check if a customer exists with the given mobile number.
+            if (customer_mobile) {
+                const [existingCustomer] = await connection.query('SELECT customer_id FROM Customers WHERE contact_no = ?', [customer_mobile]);
+                if (existingCustomer.length > 0) {
+                    customer_id = existingCustomer[0].customer_id;
+                }
+            }
+
+            // Step 2: If no customer was found, create a new one.
+            if (!customer_id && customer_name) { // A name is required to create a new customer
+                const createCustomerSql = 'INSERT INTO Customers (customer_name, contact_no) VALUES (?, ?)';
+                const [newCustomerResult] = await connection.query(createCustomerSql, [customer_name, customer_mobile || null]);
+                customer_id = newCustomerResult.insertId;
+            }
+        }
+        // --- END OF NEW CUSTOMER LOGIC ---
+
+
+        // --- Stock Check & Calculation Logic (No Changes Here) ---
         let sub_total = 0;
         const itemPromises = items.map(async (item) => {
             const [productRows] = await connection.query('SELECT product_name, selling_price, quantity_in_stock FROM Products WHERE product_id = ?', [item.product_id]);
@@ -37,47 +66,44 @@ export const createBill = async (req, res) => {
         });
 
         const processedItems = await Promise.all(itemPromises);
-
-        // --- 3. Calculate Final Bill Amounts ---
+        
         const discount_amount = sub_total * (discount_percentage / 100);
         const taxable_amount = sub_total - discount_amount;
         const tax_amount = taxable_amount * (tax_percentage / 100);
         const net_amount = taxable_amount + tax_amount;
 
-        // --- 4. Insert into Bills Table ---
+
+        // --- MODIFIED: Insert into Bills Table ---
+        // The customer_id (which can be null or a number) is now included.
         const billSql = 'INSERT INTO Bills (customer_id, sub_total, discount_percentage, discount_amount, tax_percentage, tax_amount, net_amount) VALUES (?, ?, ?, ?, ?, ?, ?)';
         const billValues = [customer_id, sub_total, discount_percentage, discount_amount, tax_percentage, tax_amount, net_amount];
         const [billResult] = await connection.query(billSql, billValues);
         const newBillId = billResult.insertId;
 
-        // --- 5. Insert into Bill_Items Table and Update Product Stock ---
+        
+        // --- Bill Items & Stock Update Logic (No Changes Here) ---
         const billItemPromises = processedItems.map(item => {
-            // Insert item into bill details
             const itemSql = 'INSERT INTO Bill_Items (bill_id, product_id, quantity_sold, price_per_unit, total_price) VALUES (?, ?, ?, ?, ?)';
             connection.query(itemSql, [newBillId, item.product_id, item.quantity_sold, item.selling_price, item.total_price]);
-
-            // Update product stock
+            
             const stockSql = 'UPDATE Products SET quantity_in_stock = quantity_in_stock - ? WHERE product_id = ?';
             connection.query(stockSql, [item.quantity_sold, item.product_id]);
         });
-        
         await Promise.all(billItemPromises);
 
-        // --- 6. Commit Transaction ---
+
+        // Commit and Release (No Changes Here)
         await connection.commit();
         res.status(201).json({ message: 'Bill created successfully!', billId: newBillId });
 
     } catch (error) {
-        // --- 7. Rollback Transaction on Error ---
         if (connection) await connection.rollback();
         console.error('Error creating bill:', error);
         res.status(500).json({ message: error.message || 'Server error while creating bill.' });
     } finally {
-        // --- 8. Release Connection ---
         if (connection) connection.release();
     }
 };
-
 
 // @desc    Get all bills
 // @route   GET /api/billing

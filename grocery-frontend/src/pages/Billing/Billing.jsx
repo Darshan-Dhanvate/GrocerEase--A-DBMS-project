@@ -1,4 +1,4 @@
-// src/pages/Billing/Billing.jsx
+// frontend/src/pages/Billing/Billing.jsx
 // This is the main component for the Billing (POS) page.
 
 import React, { useState, useEffect } from 'react';
@@ -19,6 +19,7 @@ const Billing = () => {
     const fetchProducts = async () => {
         try {
             setLoading(true);
+            // By default, this now only fetches sellable products (active, in stock, not expired)
             const data = await productService.getAllProducts();
             setProducts(data);
             setError(null);
@@ -39,7 +40,6 @@ const Billing = () => {
         const existingItem = cart.find(item => item.product_id === productId);
 
         if (existingItem) {
-            // Increase quantity if item is already in cart, respecting stock limits
             if (existingItem.quantity_sold < productToAdd.quantity_in_stock) {
                 setCart(cart.map(item =>
                     item.product_id === productId
@@ -47,11 +47,9 @@ const Billing = () => {
                         : item
                 ));
             } else {
-                // In a real app, show a toast notification for max stock
-                console.warn("Max stock reached for this item.");
+                alert("Maximum stock reached for this item.");
             }
         } else {
-            // Add new item to cart
             setCart([...cart, {
                 ...productToAdd,
                 quantity_sold: 1,
@@ -63,11 +61,9 @@ const Billing = () => {
     const handleUpdateQuantity = (productId, newQuantity) => {
         setCart(cart.map(item => {
             if (item.product_id === productId) {
-                // Clamp the quantity between 1 and max available stock
                 const validatedQty = Math.max(1, Math.min(newQuantity, item.max_stock));
                 return { ...item, quantity_sold: validatedQty };
             }
-
             return item;
         }));
     };
@@ -76,24 +72,24 @@ const Billing = () => {
         setCart(cart.filter(item => item.product_id !== productId));
     };
 
-    const handleGenerateBill = async (discount, tax) => {
-        const billData = {
-            discount_percentage: discount,
-            tax_percentage: tax,
+    // --- MODIFIED ---
+    // This function now receives a single object with all bill details.
+    const handleGenerateBill = async (billDetails) => {
+        const finalBillData = {
+            ...billDetails, // Contains customer info, discount, and tax
             items: cart.map(item => ({
                 product_id: item.product_id,
                 quantity_sold: item.quantity_sold
             }))
         };
         try {
-            const result = await billingService.createBill(billData);
+            const result = await billingService.createBill(finalBillData);
             const fullBillDetails = await billingService.getBillById(result.billId);
             setReceiptDetails(fullBillDetails);
             setCart([]); // Clear the cart
             fetchProducts(); // Refresh product list to show updated stock
         } catch (err) {
-            console.error("Failed to generate bill:", err);
-            // Show an error toast to the user
+            alert(err.response?.data?.message || 'Failed to generate bill.');
         }
     };
 

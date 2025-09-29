@@ -1,19 +1,18 @@
 // frontend/src/components/layout/Sidebar.jsx
 import React from 'react';
-import { NavLink } from 'react-router-dom';
-// Import the new TrendingUp icon for the recommender
-import { LayoutDashboard, ShoppingCart, Boxes, Truck, Settings, History, TrendingUp } from 'lucide-react';
+// --- THIS LINE IS CORRECTED ---
+import { NavLink } from 'react-router-dom'; 
+import { LayoutDashboard, ShoppingCart, Boxes, Truck, Settings, History, TrendingUp, Users } from 'lucide-react';
 
-// Add the new "Recommender" link to this array
 const mainNavLinks = [
     { to: "/", text: "Dashboard", icon: LayoutDashboard },
     { to: "/billing", text: "Billing (POS)", icon: ShoppingCart },
     { to: "/inventory", text: "Inventory", icon: Boxes },
     { to: "/suppliers", text: "Suppliers", icon: Truck },
+    { to: "/customers", text: "Customers", icon: Users },
     { to: "/history", text: "History", icon: History },
 ];
 
-// Business intelligence links can be grouped separately
 const secondaryNavLinks = [
     { to: "/recommender", text: "Recommender", icon: TrendingUp },
 ]

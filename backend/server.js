@@ -11,6 +11,7 @@ import billingRoutes from './routes/billingRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
 // ----> This is the new line you need to add <----
 import adminRoutes from './routes/adminRoutes.js'; 
+import customerRoutes from './routes/customerRoutes.js';
 
 const app = express();
 // Use a PORT from the environment or default to 3001
@@ -27,6 +28,7 @@ app.use('/api/billing', billingRoutes);
 app.use('/api/reports', reportRoutes);
 // ----> This is the new line you need to add <----
 app.use('/api/admin', adminRoutes); 
+app.use('/api/customers', customerRoutes);
 
 // A simple root route to check if the server is running
 app.get('/', (req, res) => {

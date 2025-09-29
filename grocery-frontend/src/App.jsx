@@ -13,8 +13,9 @@ import Billing from './pages/Billing/Billing.jsx';
 import Inventory from './pages/Inventory/Inventory.jsx';
 import Suppliers from './pages/Suppliers/Suppliers.jsx';
 import History from './pages/History/History.jsx';
+import Recommender from './pages/Recommender/Recommender.jsx';
 import Settings from './pages/Settings/Settings.jsx';
-import Recommender from './pages/Recommender/Recommender.jsx'; // <-- IMPORT the new page
+import Customers from './pages/Customers/Customers.jsx'; // <-- IMPORT the new page
 
 function App() {
   return (
@@ -27,8 +28,9 @@ function App() {
             <Route path="/billing" element={<Billing />} />
             <Route path="/inventory" element={<Inventory />} />
             <Route path="/suppliers" element={<Suppliers />} />
+            <Route path="/customers" element={<Customers />} /> {/* <-- ADD the new route */}
             <Route path="/history" element={<History />} />
-            <Route path="/recommender" element={<Recommender />} /> {/* <-- ADD the new route */}
+            <Route path="/recommender" element={<Recommender />} />
             <Route path="/settings" element={<Settings />} />
             
             {/* A catch-all route for pages that don't exist */}
