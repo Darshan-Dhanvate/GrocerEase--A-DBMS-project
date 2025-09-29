@@ -1,15 +1,18 @@
 // src/services/productService.js
 // This file centralizes all API calls related to products.
 
-import apiClient from './api';
+import apiClient from './api.js';
 
 /**
- * Fetches all products from the backend.
+ * --- MODIFIED ---
+ * Fetches products from the backend, with an optional view filter.
+ * @param {string} view - The filter to apply (e.g., 'unavailable', 'all'). Defaults to only sellable items.
  * @returns {Promise<Object>} A promise that resolves to the server's response data.
  */
-export const getAllProducts = async () => {
+export const getAllProducts = async (view = 'default') => {
     try {
-        const response = await apiClient.get('/products');
+        // We use query params to tell the backend which filter to apply.
+        const response = await apiClient.get(`/products?view=${view}`);
         return response.data;
     } catch (error) {
         console.error("Error fetching products:", error);
@@ -49,16 +52,33 @@ export const updateProduct = async (id, productData) => {
 };
 
 /**
- * Deletes a product.
- * @param {number} id - The ID of the product to delete.
+ * --- RENAMED from deleteProduct to deactivateProduct ---
+ * Deactivates a product (soft delete).
+ * @param {number} id - The ID of the product to deactivate.
  * @returns {Promise<Object>} A promise that resolves to the server's response data.
  */
-export const deleteProduct = async (id) => {
+export const deactivateProduct = async (id) => {
     try {
         const response = await apiClient.delete(`/products/${id}`);
         return response.data;
     } catch (error) {
-        console.error(`Error deleting product ${id}:`, error);
+        console.error(`Error deactivating product ${id}:`, error);
+        throw error;
+    }
+};
+
+/**
+ * --- NEW FUNCTION ---
+ * Permanently deletes a product from the database.
+ * @param {number} id - The ID of the product to permanently delete.
+ * @returns {Promise<Object>} A promise that resolves to the server's response data.
+ */
+export const permanentlyDeleteProduct = async (id) => {
+    try {
+        const response = await apiClient.delete(`/products/permanent-delete/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Error permanently deleting product ${id}:`, error);
         throw error;
     }
 };

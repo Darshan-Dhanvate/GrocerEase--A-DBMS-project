@@ -1,36 +1,33 @@
 // routes/productRoutes.js
-// This file defines the API endpoints (routes) related to products.
-// It maps each route to a specific controller function.
-
 import express from 'express';
-const router = express.Router();
-
-// Import the controller functions that will handle the request logic
 import {
     getAllProducts,
     getProductById,
     createProduct,
     updateProduct,
-    deleteProduct
+    deactivateProduct, // Renamed from deleteProduct
+    permanentlyDeleteProduct // New function
 } from '../controllers/productController.js';
 
-// Define the routes for the /api/products endpoint
+const router = express.Router();
 
-// Chaining routes for the same path '/'
-// GET /api/products -> Fetches all products
-// POST /api/products -> Creates a new product
+// This route remains the same for getting all (filtered) products and creating new ones.
 router.route('/')
     .get(getAllProducts)
     .post(createProduct);
 
-// Chaining routes for a specific product ID '/:id'
-// GET /api/products/:id -> Fetches a single product
-// PUT /api/products/:id -> Updates a single product
-// DELETE /api/products/:id -> Deletes a single product
+// --- MODIFIED ---
+// We now have two distinct endpoints for deletion to ensure safety.
+
+// This route is for deactivating a product (soft delete).
+// We'll keep using the standard DELETE verb for this common action.
 router.route('/:id')
     .get(getProductById)
     .put(updateProduct)
-    .delete(deleteProduct);
+    .delete(deactivateProduct); // Changed from deleteProduct
 
-// Export the router to be used in the main server.js file
+// This is a new, specific route for permanent deletion.
+router.route('/permanent-delete/:id')
+    .delete(permanentlyDeleteProduct);
+
 export default router;

@@ -1,4 +1,4 @@
-// src/App.jsx
+// frontend/src/App.jsx
 // Final root component with all pages and routing configured.
 
 import React from 'react';
@@ -12,6 +12,7 @@ import Dashboard from './pages/Dashboard/Dashboard.jsx';
 import Billing from './pages/Billing/Billing.jsx';
 import Inventory from './pages/Inventory/Inventory.jsx';
 import Suppliers from './pages/Suppliers/Suppliers.jsx';
+import Settings from './pages/Settings/Settings.jsx'; // <-- IMPORT the new page
 
 function App() {
   return (
@@ -24,7 +25,9 @@ function App() {
             <Route path="/billing" element={<Billing />} />
             <Route path="/inventory" element={<Inventory />} />
             <Route path="/suppliers" element={<Suppliers />} />
-            {/* You can add a 404 Not Found component here */}
+            <Route path="/settings" element={<Settings />} /> {/* <-- ADD the new route */}
+            
+            {/* A catch-all route for pages that don't exist */}
             <Route path="*" element={<h1 className="text-3xl font-bold">404: Page Not Found</h1>} />
           </Routes>
         </main>
