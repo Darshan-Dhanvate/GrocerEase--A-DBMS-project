@@ -22,8 +22,17 @@ import Settings from './pages/Settings/Settings.jsx';
 const AppLayout = () => (
   <div className="flex h-screen bg-gray-100 font-sans">
     <Sidebar />
-    <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
-      <Outlet />
+    {/* Make the main content area a flex column */}
+    <main className="flex-1 flex flex-col p-6 lg:p-8 overflow-y-auto">
+      {/* Page content will grow to fill the space */}
+      <div className="flex-grow">
+        <Outlet />
+      </div>
+      
+      {/* --- THIS IS THE NEW FOOTER --- */}
+      <footer className="text-center text-sm text-gray-500 py-4 mt-auto">
+        © 2025 Darshan Dhanvate. All Rights Reserved.
+      </footer>
     </main>
   </div>
 );
