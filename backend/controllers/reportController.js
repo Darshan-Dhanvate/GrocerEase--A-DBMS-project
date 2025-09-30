@@ -121,3 +121,29 @@ export const getExpiryAlertReport = async (req, res) => {
         res.status(500).json({ message: 'Server error while generating expiry alert report.' });
     }
 };
+
+// @desc    Get daily sales grouped by category for the pie chart
+// @route   GET /api/reports/sales-by-category
+// @access  Private/Admin
+export const getSalesByCategory = async (req, res) => {
+    try {
+        const sql = `
+            SELECT 
+                COALESCE(p.category, 'Uncategorized') as category,
+                SUM(bi.total_price) as total_sales
+            FROM Bill_Items bi
+            JOIN Bills b ON bi.bill_id = b.bill_id
+            JOIN Products p ON bi.product_id = p.product_id
+            WHERE DATE(b.bill_date) = CURDATE()
+            GROUP BY p.category
+            ORDER BY total_sales DESC;
+        `;
+
+        const [categorySales] = await db.query(sql);
+        res.status(200).json(categorySales);
+
+    } catch (error) {
+        console.error('Error generating sales by category report:', error);
+        res.status(500).json({ message: 'Server error while generating category report.' });
+    }
+};

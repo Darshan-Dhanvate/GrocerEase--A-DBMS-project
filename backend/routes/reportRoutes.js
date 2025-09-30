@@ -6,7 +6,8 @@ import {
     getDailySalesReport,
     getLowStockReport,
     getExpiryAlertReport,
-    getTopSellingProducts // <-- IMPORT the new function
+    getTopSellingProducts,
+    getSalesByCategory  // <-- IMPORT the new function
 } from '../controllers/reportController.js';
 
 const router = express.Router();
@@ -25,5 +26,8 @@ router.get('/stock/expiring', getExpiryAlertReport);
 // --- NEW ROUTE ---
 // Route for the product recommender system
 router.get('/top-products', getTopSellingProducts);
+
+// Route for the sales-by-category pie chart data
+router.get('/sales-by-category', getSalesByCategory);
 
 export default router;

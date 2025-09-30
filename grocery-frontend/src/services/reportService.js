@@ -5,6 +5,21 @@ import apiClient from './api.js';
 
 /**
  * --- NEW FUNCTION ---
+ * Fetches daily sales data grouped by category for the pie chart.
+ * @returns {Promise<Object>} A promise that resolves to the server's response data.
+ */
+export const getSalesByCategory = async () => {
+    try {
+        const response = await apiClient.get('/reports/sales-by-category');
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching sales by category:", error);
+        throw error;
+    }
+};
+
+/**
+ * --- NEW FUNCTION ---
  * Fetches the top-selling products for a given time period.
  * @param {string} period - The time period ('7days', '30days', 'alltime').
  * @returns {Promise<Object>} A promise that resolves to the server's response data.
