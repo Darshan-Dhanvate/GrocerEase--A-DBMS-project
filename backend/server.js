@@ -3,6 +3,7 @@
 
 import express from 'express';
 import cors from 'cors';
+import authRoutes from './routes/authRoutes.js'; // <-- ADD THIS LINE
 
 // Import all the route modules
 import productRoutes from './routes/productRoutes.js';
@@ -22,6 +23,7 @@ app.use(cors());
 app.use(express.json());
 
 // Tell the app to use the imported routes with their API prefixes
+app.use('/api/auth', authRoutes); // <-- ADD THIS LINE
 app.use('/api/products', productRoutes);
 app.use('/api/suppliers', supplierRoutes);
 app.use('/api/billing', billingRoutes);

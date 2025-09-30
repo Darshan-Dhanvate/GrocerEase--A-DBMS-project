@@ -1,44 +1,56 @@
 // frontend/src/App.jsx
-// Final root component with all pages and routing configured.
-
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+// The <Router> component is removed from here
+import { Routes, Route, Outlet, Navigate } from 'react-router-dom';
 
-// Layout Component
+// Import Layout and Pages
 import Sidebar from './components/layout/Sidebar.jsx';
-
-// Page Components
+import ProtectedRoute from './components/auth/ProtectedRoute.jsx';
+import LandingPage from './pages/Landing/LandingPage.jsx';
+import LoginPage from './pages/Landing/LoginPage.jsx';
+import SignupPage from './pages/Landing/SignupPage.jsx';
 import Dashboard from './pages/Dashboard/Dashboard.jsx';
 import Billing from './pages/Billing/Billing.jsx';
 import Inventory from './pages/Inventory/Inventory.jsx';
 import Suppliers from './pages/Suppliers/Suppliers.jsx';
+import Customers from './pages/Customers/Customers.jsx';
 import History from './pages/History/History.jsx';
 import Recommender from './pages/Recommender/Recommender.jsx';
 import Settings from './pages/Settings/Settings.jsx';
-import Customers from './pages/Customers/Customers.jsx'; // <-- IMPORT the new page
+
+// This layout component remains the same
+const AppLayout = () => (
+  <div className="flex h-screen bg-gray-100 font-sans">
+    <Sidebar />
+    <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
+      <Outlet />
+    </main>
+  </div>
+);
 
 function App() {
+  // The <Router> wrapper is removed from this return statement
   return (
-    <Router>
-      <div className="flex h-screen bg-gray-100 font-sans">
-        <Sidebar />
-        <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
-          <Routes>
+      <Routes>
+        <Route path="/landing" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+
+        <Route element={<ProtectedRoute />}>
+          <Route element={<AppLayout />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/billing" element={<Billing />} />
             <Route path="/inventory" element={<Inventory />} />
             <Route path="/suppliers" element={<Suppliers />} />
-            <Route path="/customers" element={<Customers />} /> {/* <-- ADD the new route */}
+            <Route path="/customers" element={<Customers />} />
             <Route path="/history" element={<History />} />
             <Route path="/recommender" element={<Recommender />} />
             <Route path="/settings" element={<Settings />} />
-            
-            {/* A catch-all route for pages that don't exist */}
-            <Route path="*" element={<h1 className="text-3xl font-bold">404: Page Not Found</h1>} />
-          </Routes>
-        </main>
-      </div>
-    </Router>
+          </Route>
+        </Route>
+
+        <Route path="*" element={<Navigate to="/landing" />} />
+      </Routes>
   );
 }
 
