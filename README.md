@@ -47,11 +47,12 @@ GrocerEase is a comprehensive, full-stack web application designed to modernize 
 
 ## 📸 Screenshots
 
-| Login Page                               | Dashboard                                 |
-| ---------------------------------------- | ----------------------------------------- |
-|      |     |
-| **Point of Sale** | **Inventory Management** |
-|  |  |
+| Login & POS | Dashboard & Inventory |
+| :---: | :---: |
+| **Login Page** <br> ![Login Page](./screenshots/login.png) | **Dashboard** <br> ![Dashboard](./screenshots/dashboard.png) |
+| **Point of Sale** <br> ![Point of Sale](./screenshots/pos.png) | **Inventory Management** <br> ![Inventory Management](./screenshots/inventory.png) |
+| **Product Recommender** |
+| ![Product Recommender](./screenshots/recommender.png) |
 
 ## 🛠️ Technology Stack
 
