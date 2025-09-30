@@ -1,7 +1,8 @@
 // frontend/src/pages/Dashboard/Dashboard.jsx
 import React, { useState, useEffect } from 'react';
 import KpiCard from './KpiCard.jsx';
-import DailySalesPieChart from './DailySalesPieChart.jsx'; // <-- IMPORT the new chart component
+import DailySalesPieChart from './DailySalesPieChart.jsx';
+import LowStockModal from './LowStockModal.jsx'; // <-- IMPORT the new modal
 import { DollarSign, ListChecks, Package, AlertTriangle } from 'lucide-react';
 import * as reportService from '../../services/reportService.js';
 import { formatCurrency, formatDate } from '../../utils/formatters.js';
@@ -15,17 +16,19 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // --- NEW STATE for the modal ---
+    const [isLowStockModalOpen, setIsLowStockModalOpen] = useState(false);
+    const [lowStockItems, setLowStockItems] = useState([]);
+
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                // Fetch all data in parallel
                 const [sales, lowStock, expiring] = await Promise.all([
                     reportService.getDailySalesReport(),
                     reportService.getLowStockReport(),
                     reportService.getExpiringReport(),
                 ]);
-                // We update the state with the length of the lowStock array for the KPI card
                 setDashboardData({ sales, lowStockCount: lowStock.length, expiring });
                 setError(null);
             } catch (err) {
@@ -35,9 +38,23 @@ const Dashboard = () => {
                 setLoading(false);
             }
         };
-
         fetchData();
     }, []);
+
+    // --- NEW FUNCTION to handle the click ---
+    const handleLowStockClick = async () => {
+        // Prevent opening the modal if there are no low stock items.
+        if (dashboardData.lowStockCount === 0) return;
+        
+        try {
+            // Fetch the detailed list only when the user clicks the card
+            const items = await reportService.getLowStockReport();
+            setLowStockItems(items);
+            setIsLowStockModalOpen(true); // Open the modal
+        } catch (err) {
+            alert("Could not fetch the list of low stock items.");
+        }
+    };
 
     if (loading) {
         return <div className="text-center text-lg text-gray-600">Loading Dashboard...</div>;
@@ -51,7 +68,6 @@ const Dashboard = () => {
         <div>
             <h1 className="text-3xl font-bold mb-6 text-gray-800">Dashboard</h1>
             
-            {/* Main KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <KpiCard 
                     title="Today's Sales" 
@@ -65,23 +81,22 @@ const Dashboard = () => {
                     icon={<ListChecks />}
                     colorClass="text-blue-600"
                 />
-                <KpiCard 
-                    title="Low Stock Items" 
-                    value={dashboardData.lowStockCount}
-                    icon={<Package />}
-                    colorClass="text-yellow-600"
-                />
+
+                {/* --- THIS CARD IS NOW WRAPPED IN A CLICKABLE DIV --- */}
+                <div onClick={handleLowStockClick} className={dashboardData.lowStockCount > 0 ? 'cursor-pointer' : ''}>
+                    <KpiCard 
+                        title="Low Stock Items" 
+                        value={dashboardData.lowStockCount}
+                        icon={<Package />}
+                        colorClass="text-yellow-600"
+                    />
+                </div>
             </div>
             
-            {/* New section for charts and lists, organized in a grid */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                {/* --- THIS IS THE NEW PART --- */}
-                {/* Pie chart takes up 2 of 5 columns on large screens */}
                 <div className="lg:col-span-2">
                     <DailySalesPieChart />
                 </div>
-
-                {/* Expiring Soon list takes up 3 of 5 columns on large screens */}
                 <div className="lg:col-span-3 bg-white p-6 rounded-lg shadow-md">
                     <h3 className="text-xl font-bold mb-4 text-red-600 flex items-center">
                         <AlertTriangle className="mr-2" />
@@ -113,6 +128,14 @@ const Dashboard = () => {
                     </div>
                 </div>
             </div>
+
+            {/* --- NEW: Conditionally render the modal --- */}
+            {isLowStockModalOpen && (
+                <LowStockModal 
+                    items={lowStockItems}
+                    onClose={() => setIsLowStockModalOpen(false)}
+                />
+            )}
         </div>
     );
 };
